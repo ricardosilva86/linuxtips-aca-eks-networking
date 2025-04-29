@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+
+  init:
+    cmds:
+      - terraform init -backend-config=environment/prod/backend.tfvars
+
+  validate:
+    cmds:
+      - terraform validate
+
+  fmt:
+    cmds:
+      - terraform fmt --recursive -diff
+
+  plan:*:
+    vars:
+      ENV: '{{index .MATCH 0}}'
+    dotenv:
+      - '{{ .ENV }}/.env'
+    cmds:
+      - terraform plan -var-file=environment/{{ .ENV }}/terraform.tfvars -out plan.out
+
+  apply:*:
+    vars:
+      ENV: '{{index .MATCH 0}}'
+    dotenv:
+      - '{{ .ENV }}/.env'
+    cmds:
+      - terraform apply -auto-approve plan.out
+
+  destroy:*:
+      vars:
+        ENV: '{{index .MATCH 0}}'
+      dotenv:
+        - '{{ .ENV }}/.env'
+      cmds:
+        - terraform apply -destroy -auto-approve plan.out
