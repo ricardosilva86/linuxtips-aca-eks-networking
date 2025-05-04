@@ -2,9 +2,13 @@ version: '3'
 
 tasks:
 
-  init:
+  init:*:
+    vars:
+      ENV: '{{index .MATCH 0}}'
+    dotenv:
+      - '{{ .ENV }}/.env'
     cmds:
-      - terraform init -backend-config=environment/prod/backend.tfvars
+      - terraform init -backend-config=environments/{{ .ENV }}/backend.tfvars
 
   validate:
     cmds:
@@ -12,7 +16,7 @@ tasks:
 
   fmt:
     cmds:
-      - terraform fmt --recursive -diff
+      - terraform fmt -recursive
 
   plan:*:
     vars:
@@ -20,7 +24,7 @@ tasks:
     dotenv:
       - '{{ .ENV }}/.env'
     cmds:
-      - terraform plan -var-file=environment/{{ .ENV }}/terraform.tfvars -out plan.out
+      - terraform plan -var-file=environments/{{ .ENV }}/terraform.tfvars -out plan.out
 
   apply:*:
     vars:

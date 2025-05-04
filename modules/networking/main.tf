@@ -1,5 +1,5 @@
 locals {
-  database_subnets = { for idx, key in keys(var.database_subnets) : key =>  100 + idx }
+  database_subnets = { for idx, key in keys(var.database_subnets) : key => 100 + idx }
 }
 
 ##### VPC #####
@@ -186,3 +186,32 @@ resource "aws_network_acl_rule" "allow_ports" {
   from_port      = 0
   to_port        = each.value.acls.port
 }
+
+### EXPORTANDO OS IDS PARA SSM PARAMETERS ###
+resource "aws_ssm_parameter" "vpc_id" {
+  name  = format("/%s/vpc/vpc_id", var.project_name)
+  type  = "String"
+  value = aws_vpc.main.id
+}
+
+resource "aws_ssm_parameter" "private_subnets" {
+  for_each = aws_subnet.private_subnets
+  name     = format("/%s/vpc/subnet_private_%s", var.project_name, split("-", aws_subnet.private_subnets[each.key].availability_zone)[2])
+  type     = "String"
+  value    = aws_subnet.private_subnets[each.key].id
+}
+
+resource "aws_ssm_parameter" "public_subnets" {
+  for_each = aws_subnet.public_subnets
+  name     = format("/%s/vpc/subnet_public_%s", var.project_name, split("-", aws_subnet.public_subnets[each.key].availability_zone)[2])
+  type     = "String"
+  value    = aws_subnet.public_subnets[each.key].id
+}
+
+resource "aws_ssm_parameter" "database_subnets" {
+  for_each = aws_subnet.databases_subnets
+  name     = format("/%s/vpc/subnet_database_%s", var.project_name, split("-", aws_subnet.databases_subnets[each.key].availability_zone)[2])
+  type     = "String"
+  value    = aws_subnet.databases_subnets[each.key].id
+}
+

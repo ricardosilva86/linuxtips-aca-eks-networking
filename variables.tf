@@ -1,16 +1,4 @@
-variable "project_name" {
-  type = string
-}
-
-variable "region" {
-  type = string
-}
-
-variable "vpc_cidr" {
-  type = string
-}
-
-variable "vpc_additional_cidr" {
-  type    = list(string)
-  default = []
-}
+variable "region" {}
+variable "project_name" {}
+variable "vpc_cidr" {}
+variable "tags" {}
